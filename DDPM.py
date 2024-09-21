@@ -107,7 +107,7 @@ def train(model, train_loader, val_loader, optimizer, num_epochs, timesteps, bet
             train_losses.append(train_loss.item())
 
         model.eval()  # 切换到评估模式
-        with torch.no_grad():  # 不计算梯度
+        with torch.no_grad():  
             for batch in val_loader:
                 batch = batch.view(batch.size(0), -1, 28).to(device)  # 调整输入形状并移动到设备
                 noise = forward_diffusion(batch, torch.randint(0, timesteps, (1,)).item(), beta)
@@ -131,7 +131,7 @@ def generate_images(model, timesteps, beta, device, num_images=10):
     generated_images = []
 
     # 初始化随机噪声
-    noise = torch.randn(num_images, 1, 28).to(device)  # 假设输入序列的长度为1，28为特征维度
+    noise = torch.randn(num_images, 1, 28).to(device)  # 输入序列的长度为1，28为特征维度
 
     for t in reversed(range(timesteps)):
         with torch.no_grad():
@@ -154,13 +154,13 @@ def generate_images(model, timesteps, beta, device, num_images=10):
 def reverse_diffusion(noise, predictions, t, beta):
     alpha_t = 1 - beta[t]
     return (noise - (beta[t] * predictions)) / torch.sqrt(alpha_t)
-# 参数设置
+# 超参数设置
 input_size = 28  # 图像宽度
 hidden_size = 128  # RNN隐藏层大小
 output_size = 28  # 输出图像宽度
 num_epochs = 10
 timesteps = 50  # 扩散步数
-beta = torch.linspace(0.1, 0.2, timesteps)  # 简单的beta设置
+beta = torch.linspace(0.1, 0.2, timesteps)  # beta设置
 
 # 初始化模型和优化器
 model = SimpleRNN(input_size, hidden_size, output_size)

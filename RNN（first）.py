@@ -27,7 +27,7 @@ class SimpleRNN(nn.Module):
         self.hidden_size = hidden_size
         self.input_size = input_size
 
-        # Linear layers for the RNN operations
+        
         '''nn.Linear函数实现了线性变换，公式为y=xW^T+b，x为输入数据，W为权重矩阵，
         初始化nn.Linear时，权重使用标准正态分布初始化，偏置使用0进行初始化。b为偏置向量，y为输出数据'''
         '''self.input_to_hidden：将输入映射到隐藏状态。
@@ -41,18 +41,18 @@ class SimpleRNN(nn.Module):
         batch_size = x.size(0)
         seq_length = x.size(1)
         # 两者分别为输入序列的批量大小和序列长度
-        # Initialize hidden state
+       
         hidden = torch.zeros(batch_size, self.hidden_size).to(x.device)
         '''初始化隐藏状态为零，形状为 (batch_size, hidden_size)，并将其移动到与输入数据相同的设备（CPU或GPU）。'''
-        # Process each time step
+        
         for t in range(seq_length):
             # Calculate new hidden state
             hidden = torch.tanh(self.input_to_hidden(x[:, t, :]) + self.hidden_to_hidden(hidden))
             # 用torch.tanh函数作为激活函数来计算隐藏状态
-        # Calculate output from the final hidden state
+        
         output = self.hidden_to_output(hidden)
         return output
-# Define the weight initialization function
+
 def initialize_weights(m):
     if isinstance(m, nn.Linear):
         nn.init.xavier_uniform_(m.weight)
@@ -60,7 +60,7 @@ def initialize_weights(m):
             nn.init.constant_(m.bias, 0)
 
 
-# Data preparation
+
 '''transforms.Compose：将多个数据变换操作组合成一个变换流程。
 transforms.ToTensor()：将输入图像数据转换为 PyTorch 张量，并将像素值缩放到 [0, 1] 范围。
 transforms.Normalize((0.5,), (0.5,))：对张量进行标准化。
@@ -80,7 +80,7 @@ batch_size=64：每个批次包含 64 个样本。
 shuffle=True：在每个 epoch 开始时打乱数据顺序，这有助于提高训练的泛化能力。'''
 train_loader = DataLoader(dataset=train_dataset, batch_size=64, shuffle=True)
 
-# Hyperparameters
+
 '''超数据设置：input_size输入特征的维度，对于数据集来说，是一个28*28像素的灰度图，每个时间步的输入是一个长度为28的向量
 hidden_size为128，代表隐藏层的大小，即隐藏单元的数量
 output_size为输出特征的维度，代表输出的10个类别
@@ -91,10 +91,10 @@ output_size = 10
 num_epochs = 18
 learning_rate = 0.001
 
-# Model, loss function, and optimizer
+
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 model = SimpleRNN(input_size, hidden_size, output_size).to(device)
-# Apply weight initialization
+
 model.apply(initialize_weights)
 # nn.CrossEntropyLoss()：定义损失函数。交叉熵损失函数通常用于分类问题，计算预测概率与真实标签之间的差异。
 criterion = nn.CrossEntropyLoss()
@@ -102,7 +102,7 @@ criterion = nn.CrossEntropyLoss()
 # 将模型的所有参数传递给优化器，并指定学习率 learning_rate。
 optimizer = optim.Adam(model.parameters(), lr=learning_rate)
 
-# Training the model
+
 train_losses = []
 for epoch in range(num_epochs):
     epoch_loss = 0
@@ -110,11 +110,11 @@ for epoch in range(num_epochs):
         images = images.view(-1, 28, 28).to(device)
         labels = labels.to(device)
 
-        # Forward pass
+        
         outputs = model(images)
         loss = criterion(outputs, labels)
 
-        # Backward pass and optimization
+        # 反向传播
         # 计算预测输出与真实标签之间的损失值
         optimizer.zero_grad()
         # 清零优化器中的梯度，以防止梯度累加。
@@ -128,7 +128,7 @@ for epoch in range(num_epochs):
     train_losses.append(average_loss)
     print(f'Epoch [{epoch + 1}/{num_epochs}], Loss: {average_loss:.4f}')
 
-# Visualization
+# 可视化
 plt.figure(figsize=(10, 5))
 plt.plot(range(1, num_epochs + 1), train_losses, marker='o', linestyle='-')
 plt.title('Training Loss over Epochs')

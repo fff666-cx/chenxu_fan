@@ -6,13 +6,13 @@ from torch.utils.data import DataLoader, random_split
 import matplotlib.pyplot as plt
 import numpy as np
 import random
-
+# 设置随机种子
 def seed_all(seed):
     random.seed(seed)
     np.random.seed(seed)
     torch.manual_seed(seed)
     torch.cuda.manual_seed(seed)
-    torch.cuda.manual_seed_all(seed)  # for multi-GPU setups
+    torch.cuda.manual_seed_all(seed)  
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
 
@@ -37,7 +37,7 @@ class SimpleRNN(nn.Module):
         output = self.hidden_to_output(hidden)
         return output
 
-
+# 对权重进行新的可视化
 def initialize_weights(m):
     if isinstance(m, nn.Linear):
         nn.init.xavier_uniform_(m.weight)
@@ -45,7 +45,7 @@ def initialize_weights(m):
             nn.init.constant_(m.bias, 0)
 
 
-# Data preparation
+
 transform = transforms.Compose([
     transforms.ToTensor(),
     transforms.Normalize((0.5,), (0.5,))
@@ -63,7 +63,7 @@ output_size = 10
 num_epochs = 20
 learning_rate = 0.001
 
-# Model, loss function, and optimizer
+
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 model = SimpleRNN(input_size, hidden_size, output_size).to(device)
 model.apply(initialize_weights)
@@ -71,7 +71,7 @@ criterion = nn.CrossEntropyLoss()
 optimizer = optim.Adam(model.parameters(), lr=learning_rate)
 
 
-# Early stopping class
+# 设置早停机制
 class EarlyStopping:
     def __init__(self, patience, delta):
         self.patience = patience
@@ -92,6 +92,7 @@ class EarlyStopping:
             if self.counter >= self.patience:
                 self.early_stop = True
                 self.stopped_epoch = epoch
+# 计算准确率
 def calculate_accuracy(loader, model, device):
     correct = 0
     total = 0
@@ -108,7 +109,7 @@ def calculate_accuracy(loader, model, device):
 
 early_stopping = EarlyStopping(patience=5, delta=0.01)
 
-# Training the model
+
 train_losses = []
 val_losses = []
 train_accuracies = []
@@ -132,7 +133,7 @@ for epoch in range(num_epochs):
     train_accuracy = calculate_accuracy(train_loader, model, device)
     train_accuracies.append(train_accuracy)
 
-    # Validation
+    
     model.eval()
     val_loss = 0
     with torch.no_grad():
@@ -156,10 +157,10 @@ for epoch in range(num_epochs):
         print(f"Early stopping at epoch {epoch + 1}")
         break
 
-# Load the best model
+
 model.load_state_dict(torch.load('best_model.pth'))
 
-# Plotting losses
+
 plt.plot(train_losses, label='Train Loss')
 plt.plot(val_losses, label='Validation Loss')
 plt.xlabel('Epoch')
@@ -167,7 +168,7 @@ plt.ylabel('Loss')
 plt.legend()
 plt.show()
 
-
+# 部分图像的分类可视化
 def visualize_predictions(model, data_loader, device):
     model.eval()
     images, labels = next(iter(data_loader))
@@ -178,12 +179,12 @@ def visualize_predictions(model, data_loader, device):
         outputs = model(images)
         _, predicted = torch.max(outputs, 1)
 
-    # Convert to numpy for plotting
+    
     images = images.cpu().numpy()
     predicted = predicted.cpu().numpy()
     labels = labels.cpu().numpy()
 
-    # Plot images and predictions
+    
     fig, axes = plt.subplots(1, 10, figsize=(15, 3))
     for i in range(10):
         ax = axes[i]
@@ -194,5 +195,5 @@ def visualize_predictions(model, data_loader, device):
     plt.show()
 
 
-# Call the function to visualize predictions
+
 visualize_predictions(model, val_loader, device)

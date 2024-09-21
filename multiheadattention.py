@@ -59,10 +59,10 @@ seq_length = 30  # 序列长度
 # 生成一个（10，20，64）的随机张量
 x = torch.rand(batch_size, seq_length, embed_size)
 
-# Create the MultiHeadAttention layer
+
 attention_layer = MultiHeadAttention(embed_size, num_heads)
 
-# Forward pass
+
 output = attention_layer(x)
 
 print("Input shape:", x.shape)
